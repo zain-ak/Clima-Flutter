@@ -1,3 +1,4 @@
+import 'package:clima/screens/city_screen.dart';
 import 'package:clima/services/Weather.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
@@ -22,11 +23,9 @@ class _LocationScreenState extends State<LocationScreen> {
     updateUI(widget.data);
   }
 
-  void updateUI(dynamic data) {
-    if (data == null) {
-      setState(() {
-        return showDialog(context: context,
-        builder: (BuildContext context){
+  errorDialog(BuildContext context) {
+    showDialog(context: context,
+        builder: (context) {
           return AlertDialog(
             title: Text('Error fetching data', style: TextStyle(color: Colors.red[900]),),
             content: Text('There was a problem getting weather data, this could be for any'
@@ -41,8 +40,9 @@ class _LocationScreenState extends State<LocationScreen> {
             ],
           );
         });
-      });
-    }
+  }
+
+  void updateUI(dynamic data) {
     setState(() {
       temperature = (data['main']['temp'] - 273.1).toInt();
       condition = data['weather'][0]['id'];
@@ -76,11 +76,15 @@ class _LocationScreenState extends State<LocationScreen> {
                     onPressed: () async {
                       var data = await WeatherModel.getLocationWeather();
                       setState(()  {
-                        _isVisible = !_isVisible;
-                        print(_isVisible);
-                        updateUI(data);
-                        _isVisible = !_isVisible;
-                        print(_isVisible);
+                        if (data == null) {
+                          errorDialog(context);
+                        } else {
+                          _isVisible = !_isVisible;
+                          print(_isVisible);
+                          updateUI(data);
+                          _isVisible = !_isVisible;
+                          print(_isVisible);
+                        }
                       });
                     },
                     child: Icon(
@@ -89,7 +93,11 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                   ),
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return CityScreen();
+                      }));
+                    },
                     child: Icon(
                       Icons.location_city,
                       size: 50.0,
